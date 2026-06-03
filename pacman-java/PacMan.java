@@ -125,6 +125,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int lives = 3;
     boolean gameOver = false;
 
+    boolean isPaused = false;
+    String[] pauseMenuOptions = {"Resume", "Controls", "Quit"};
+    int pauseMenuIndex = 0;
+    boolean showControls = false;
+
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
         setBackground(Color.BLACK);
@@ -226,6 +231,76 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         else {
             g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
         }
+
+        if (isPaused) {
+            drawPauseMenu(g);
+        }
+    }
+
+    public void drawPauseMenu(Graphics g) {
+        // Transparent Overlay
+        g.setColor(new Color(0, 0, 0, 150));
+        g.fillRect(0, 0, boardWidth, boardHeight);
+
+        g.setFont(new Font("Monospaced", Font.BOLD, 40));
+        g.setColor(Color.YELLOW);
+        
+        if (showControls) {
+            String text;
+            int x;
+            FontMetrics fm;
+
+            // Header
+            g.setFont(new Font("Monospaced", Font.BOLD, 40));
+            g.setColor(Color.YELLOW);
+            fm = g.getFontMetrics();
+            text = "CONTROLS";
+            x = (boardWidth - fm.stringWidth(text)) / 2;
+            g.drawString(text, x, boardHeight / 2 - 150);
+            
+            // Movement Controls
+            g.setFont(new Font("Monospaced", Font.PLAIN, 20));
+            g.setColor(Color.WHITE);
+            fm = g.getFontMetrics();
+            String[] controlLines = {
+                "^ : Move Up",
+                "v : Move Down",
+                "<- : Move Left",
+                "-> : Move Right",
+                "P or ESC to Pause"
+            };
+            
+            for (int i = 0; i < controlLines.length; i++) {
+                text = controlLines[i];
+                x = (boardWidth - fm.stringWidth(text)) / 2;
+                g.drawString(text, x, boardHeight / 2 - 60 + (i * 40));
+            }
+            
+            // Return Prompt
+            g.setFont(new Font("Monospaced", Font.ITALIC, 16));
+            g.setColor(Color.YELLOW);
+            fm = g.getFontMetrics();
+            text = "Press ESC or BACKSPACE to return";
+            x = (boardWidth - fm.stringWidth(text)) / 2;
+            g.drawString(text, x, boardHeight / 2 + 160);
+        } else {
+            g.drawString("PAUSED", boardWidth / 2 - 70, boardHeight / 2 - 100);
+
+            g.setFont(new Font("Monospaced", Font.PLAIN, 24));
+            for (int i = 0; i < pauseMenuOptions.length; i++) {
+                if (i == pauseMenuIndex) {
+                    g.setColor(Color.YELLOW);
+                    g.drawString("> " + pauseMenuOptions[i], boardWidth / 2 - 60, boardHeight / 2 + (i * 40));
+                } else {
+                    g.setColor(Color.WHITE);
+                    g.drawString("  " + pauseMenuOptions[i], boardWidth / 2 - 60, boardHeight / 2 + (i * 40));
+                }
+            }
+            
+            g.setFont(new Font("Monospaced", Font.PLAIN, 14));
+            g.setColor(Color.WHITE);
+            g.drawString("UP/DOWN to Navigate, ENTER to Select", boardWidth / 2 - 140, boardHeight - 50);
+        }
     }
 
     public void move() {
@@ -303,7 +378,9 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        move();
+        if (!isPaused) {
+            move();
+        }
         repaint();
         if (gameOver) {
             gameLoop.stop();
@@ -314,10 +391,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {}
-
-    @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyPressed(KeyEvent e) {
         if (gameOver) {
             loadMap();
             resetPositions();
@@ -325,33 +399,68 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             score = 0;
             gameOver = false;
             gameLoop.start();
-        }
-        // System.out.println("KeyEvent: " + e.getKeyCode());
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            pacman.updateDirection('U');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            pacman.updateDirection('D');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            pacman.updateDirection('L');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            pacman.updateDirection('R');
+            return;
         }
 
-        if (pacman.direction == 'U') {
-            pacman.image = pacmanUpImage;
+        int keyCode = e.getKeyCode();
+
+        // Toggle Pause
+        if (keyCode == KeyEvent.VK_P || keyCode == KeyEvent.VK_ESCAPE) {
+            if (showControls) {
+                showControls = false;
+            } else {
+                isPaused = !isPaused;
+                pauseMenuIndex = 0; // Reset index when opening menu
+            }
+            repaint();
+            return;
         }
-        else if (pacman.direction == 'D') {
-            pacman.image = pacmanDownImage;
-        }
-        else if (pacman.direction == 'L') {
-            pacman.image = pacmanLeftImage;
-        }
-        else if (pacman.direction == 'R') {
-            pacman.image = pacmanRightImage;
+
+        if (isPaused) {
+            if (showControls) {
+                if (keyCode == KeyEvent.VK_ESCAPE || keyCode == KeyEvent.VK_BACK_SPACE) {
+                    showControls = false;
+                }
+            } else {
+                if (keyCode == KeyEvent.VK_UP) {
+                    pauseMenuIndex = (pauseMenuIndex - 1 + pauseMenuOptions.length) % pauseMenuOptions.length;
+                } else if (keyCode == KeyEvent.VK_DOWN) {
+                    pauseMenuIndex = (pauseMenuIndex + 1) % pauseMenuOptions.length;
+                } else if (keyCode == KeyEvent.VK_ENTER) {
+                    if (pauseMenuOptions[pauseMenuIndex].equals("Resume")) {
+                        isPaused = false;
+                    } else if (pauseMenuOptions[pauseMenuIndex].equals("Controls")) {
+                        showControls = true;
+                    } else if (pauseMenuOptions[pauseMenuIndex].equals("Quit")) {
+                        System.exit(0);
+                    }
+                }
+            }
+            repaint();
+        } else {
+            // Game movement
+            if (keyCode == KeyEvent.VK_UP) {
+                pacman.updateDirection('U');
+            } else if (keyCode == KeyEvent.VK_DOWN) {
+                pacman.updateDirection('D');
+            } else if (keyCode == KeyEvent.VK_LEFT) {
+                pacman.updateDirection('L');
+            } else if (keyCode == KeyEvent.VK_RIGHT) {
+                pacman.updateDirection('R');
+            }
+
+            if (pacman.direction == 'U') {
+                pacman.image = pacmanUpImage;
+            } else if (pacman.direction == 'D') {
+                pacman.image = pacmanDownImage;
+            } else if (pacman.direction == 'L') {
+                pacman.image = pacmanLeftImage;
+            } else if (pacman.direction == 'R') {
+                pacman.image = pacmanRightImage;
+            }
         }
     }
-}
 
+    @Override
+    public void keyReleased(KeyEvent e) {}
+}
