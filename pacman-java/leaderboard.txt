@@ -1,0 +1,4 @@
+Sanika,1520
+Sanika,1350
+Pac man,630
+man,190
