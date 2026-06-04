@@ -1,7 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -23,11 +20,10 @@ public class App {
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        PacMan pacmanGame = new PacMan();
-        frame.add(pacmanGame);
-        frame.pack();
-        pacmanGame.requestFocus();
-        frame.setVisible(true);
+        WelcomeScreen welcomeScreen = new WelcomeScreen(frame);
 
+        frame.add(welcomeScreen);
+        frame.pack();
+        frame.setVisible(true);
     }
 }
