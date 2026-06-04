@@ -130,6 +130,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int pauseMenuIndex = 0;
     boolean showControls = false;
 
+    // Fonts and Colors for Pause Menu
+    private Color pauseOverlayColor;
+    private Font headerFont;
+    private Font controlFont;
+    private Font promptFont;
+    private Font menuFont;
+    private Font menuInstructionFont;
+
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
         setBackground(Color.BLACK);
@@ -156,6 +164,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         //how long it takes to start timer, milliseconds gone between frames
         gameLoop = new Timer(50, this); //20fps (1000/50)
         gameLoop.start();
+
+        // Initialize Pause Menu Fonts and Colors
+        pauseOverlayColor = new Color(0, 0, 0, 150);
+        headerFont = new Font("Monospaced", Font.BOLD, 40);
+        controlFont = new Font("Monospaced", Font.PLAIN, 20);
+        promptFont = new Font("Monospaced", Font.ITALIC, 16);
+        menuFont = new Font("Monospaced", Font.PLAIN, 24);
+        menuInstructionFont = new Font("Monospaced", Font.PLAIN, 14);
 
     }
 
@@ -239,10 +255,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
     public void drawPauseMenu(Graphics g) {
         // Transparent Overlay
-        g.setColor(new Color(0, 0, 0, 150));
+        g.setColor(pauseOverlayColor);
         g.fillRect(0, 0, boardWidth, boardHeight);
 
-        g.setFont(new Font("Monospaced", Font.BOLD, 40));
+        g.setFont(headerFont);
         g.setColor(Color.YELLOW);
         
         if (showControls) {
@@ -251,7 +267,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             FontMetrics fm;
 
             // Header
-            g.setFont(new Font("Monospaced", Font.BOLD, 40));
+            g.setFont(headerFont);
             g.setColor(Color.YELLOW);
             fm = g.getFontMetrics();
             text = "CONTROLS";
@@ -259,7 +275,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.drawString(text, x, boardHeight / 2 - 150);
             
             // Movement Controls
-            g.setFont(new Font("Monospaced", Font.PLAIN, 20));
+            g.setFont(controlFont);
             g.setColor(Color.WHITE);
             fm = g.getFontMetrics();
             String[] controlLines = {
@@ -277,7 +293,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             }
             
             // Return Prompt
-            g.setFont(new Font("Monospaced", Font.ITALIC, 16));
+            g.setFont(promptFont);
             g.setColor(Color.YELLOW);
             fm = g.getFontMetrics();
             text = "Press ESC or BACKSPACE to return";
@@ -286,7 +302,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         } else {
             g.drawString("PAUSED", boardWidth / 2 - 70, boardHeight / 2 - 100);
 
-            g.setFont(new Font("Monospaced", Font.PLAIN, 24));
+            g.setFont(menuFont);
             for (int i = 0; i < pauseMenuOptions.length; i++) {
                 if (i == pauseMenuIndex) {
                     g.setColor(Color.YELLOW);
@@ -297,7 +313,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 }
             }
             
-            g.setFont(new Font("Monospaced", Font.PLAIN, 14));
+            g.setFont(menuInstructionFont);
             g.setColor(Color.WHITE);
             g.drawString("UP/DOWN to Navigate, ENTER to Select", boardWidth / 2 - 140, boardHeight - 50);
         }
@@ -378,9 +394,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!isPaused) {
-            move();
-        }
+        move();
         repaint();
         if (gameOver) {
             gameLoop.stop();
@@ -410,6 +424,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 showControls = false;
             } else {
                 isPaused = !isPaused;
+                if (isPaused) {
+                    gameLoop.stop();
+                } else {
+                    gameLoop.start();
+                }
                 pauseMenuIndex = 0; // Reset index when opening menu
             }
             repaint();
@@ -429,10 +448,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 } else if (keyCode == KeyEvent.VK_ENTER) {
                     if (pauseMenuOptions[pauseMenuIndex].equals("Resume")) {
                         isPaused = false;
+                        gameLoop.start();
                     } else if (pauseMenuOptions[pauseMenuIndex].equals("Controls")) {
                         showControls = true;
                     } else if (pauseMenuOptions[pauseMenuIndex].equals("Quit")) {
-                        System.exit(0);
+                        java.awt.Window window = javax.swing.SwingUtilities.getWindowAncestor(this);
+                        if (window != null) {
+                            window.dispose();
+                        }
                     }
                 }
             }
