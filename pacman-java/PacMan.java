@@ -314,10 +314,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {}
-
-    @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyPressed(KeyEvent e) {
         if (gameOver) {
             loadMap();
             resetPositions();
@@ -325,8 +322,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             score = 0;
             gameOver = false;
             gameLoop.start();
+            return;
         }
-        // System.out.println("KeyEvent: " + e.getKeyCode());
         if (e.getKeyCode() == KeyEvent.VK_UP) {
             pacman.updateDirection('U');
         }
@@ -353,5 +350,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             pacman.image = pacmanRightImage;
         }
     }
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
 }
 
