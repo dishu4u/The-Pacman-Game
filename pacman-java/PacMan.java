@@ -126,6 +126,19 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     boolean gameOver = false;
     boolean showInstructions = true;
 
+    boolean isPaused = false;
+    String[] pauseMenuOptions = {"Resume", "Controls", "Quit"};
+    int pauseMenuIndex = 0;
+    boolean showControls = false;
+
+    // Fonts and Colors for Pause Menu
+    private Color pauseOverlayColor;
+    private Font headerFont;
+    private Font controlFont;
+    private Font promptFont;
+    private Font menuFont;
+    private Font menuInstructionFont;
+
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
         setBackground(Color.BLACK);
@@ -152,6 +165,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         //how long it takes to start timer, milliseconds gone between frames
         gameLoop = new Timer(50, this); //20fps (1000/50)
         gameLoop.start();
+
+        // Initialize Pause Menu Fonts and Colors
+        pauseOverlayColor = new Color(0, 0, 0, 150);
+        headerFont = new Font("Monospaced", Font.BOLD, 40);
+        controlFont = new Font("Monospaced", Font.PLAIN, 20);
+        promptFont = new Font("Monospaced", Font.ITALIC, 16);
+        menuFont = new Font("Monospaced", Font.PLAIN, 24);
+        menuInstructionFont = new Font("Monospaced", Font.PLAIN, 14);
 
     }
 
@@ -227,54 +248,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         else {
             g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
         }
-        
-        if (showInstructions) {
-            g.setColor(new Color(0, 0, 0, 210)); 
-            g.fillRect(0, 0, boardWidth, boardHeight);
 
-            String title = "PAC-MAN";
-            String controlsTitle = "HOW TO PLAY";
-            String controls = "↑ ↓ ← → Arrow Keys to Move";
-            String objMsg = "Eat all the food, avoid the ghosts!";
-            String startMsg = "Press ANY KEY to Start!";
-
-            // Title with shadow
-            g.setFont(new Font("Arial", Font.BOLD, 50));
-            FontMetrics fm = g.getFontMetrics();
-            g.setColor(Color.BLUE);
-            g.drawString(title, (boardWidth - fm.stringWidth(title)) / 2 + 4, boardHeight / 2 - 146);
-            g.setColor(Color.YELLOW);
-            g.drawString(title, (boardWidth - fm.stringWidth(title)) / 2, boardHeight / 2 - 150);
-
-            // Draw game sprites for decoration
-            int imgY = boardHeight / 2 - 110;
-            g.drawImage(pacmanRightImage, boardWidth / 2 - 90, imgY, tileSize + 10, tileSize + 10, null);
-            g.drawImage(redGhostImage, boardWidth / 2 - 30, imgY, tileSize + 10, tileSize + 10, null);
-            g.drawImage(blueGhostImage, boardWidth / 2 + 30, imgY, tileSize + 10, tileSize + 10, null);
-            g.drawImage(pinkGhostImage, boardWidth / 2 + 90, imgY, tileSize + 10, tileSize + 10, null);
-
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 26));
-            fm = g.getFontMetrics();
-            g.drawString(controlsTitle, (boardWidth - fm.stringWidth(controlsTitle)) / 2, boardHeight / 2 - 20);
-            
-            g.setColor(Color.CYAN);
-            g.setFont(new Font("Arial", Font.PLAIN, 22));
-            fm = g.getFontMetrics();
-            g.drawString(controls, (boardWidth - fm.stringWidth(controls)) / 2, boardHeight / 2 + 20);
-            
-            g.setColor(Color.PINK);
-            g.setFont(new Font("Arial", Font.PLAIN, 20));
-            fm = g.getFontMetrics();
-            g.drawString(objMsg, (boardWidth - fm.stringWidth(objMsg)) / 2, boardHeight / 2 + 60);
-            
-            // Blinking start message
-            if ((System.currentTimeMillis() / 500) % 2 == 0) {
-                g.setColor(Color.ORANGE);
-                g.setFont(new Font("Arial", Font.BOLD, 24));
-                fm = g.getFontMetrics();
-                g.drawString(startMsg, (boardWidth - fm.stringWidth(startMsg)) / 2, boardHeight / 2 + 130);
-            }
         }
     }
 
@@ -368,14 +342,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {}
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-        if (showInstructions) {
-            showInstructions = false;
-            return;
-        }
         if (gameOver) {
             loadMap();
             resetPositions();
@@ -383,33 +350,77 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             score = 0;
             gameOver = false;
             gameLoop.start();
-        }
-        // System.out.println("KeyEvent: " + e.getKeyCode());
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            pacman.updateDirection('U');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            pacman.updateDirection('D');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            pacman.updateDirection('L');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            pacman.updateDirection('R');
+            return;
         }
 
-        if (pacman.direction == 'U') {
-            pacman.image = pacmanUpImage;
+        int keyCode = e.getKeyCode();
+
+        // Toggle Pause
+        if (keyCode == KeyEvent.VK_P || keyCode == KeyEvent.VK_ESCAPE) {
+            if (showControls) {
+                showControls = false;
+            } else {
+                isPaused = !isPaused;
+                if (isPaused) {
+                    gameLoop.stop();
+                } else {
+                    gameLoop.start();
+                }
+                pauseMenuIndex = 0; // Reset index when opening menu
+            }
+            repaint();
+            return;
         }
-        else if (pacman.direction == 'D') {
-            pacman.image = pacmanDownImage;
-        }
-        else if (pacman.direction == 'L') {
-            pacman.image = pacmanLeftImage;
-        }
-        else if (pacman.direction == 'R') {
-            pacman.image = pacmanRightImage;
+
+        if (isPaused) {
+            if (showControls) {
+                if (keyCode == KeyEvent.VK_ESCAPE || keyCode == KeyEvent.VK_BACK_SPACE) {
+                    showControls = false;
+                }
+            } else {
+                if (keyCode == KeyEvent.VK_UP) {
+                    pauseMenuIndex = (pauseMenuIndex - 1 + pauseMenuOptions.length) % pauseMenuOptions.length;
+                } else if (keyCode == KeyEvent.VK_DOWN) {
+                    pauseMenuIndex = (pauseMenuIndex + 1) % pauseMenuOptions.length;
+                } else if (keyCode == KeyEvent.VK_ENTER) {
+                    if (pauseMenuOptions[pauseMenuIndex].equals("Resume")) {
+                        isPaused = false;
+                        gameLoop.start();
+                    } else if (pauseMenuOptions[pauseMenuIndex].equals("Controls")) {
+                        showControls = true;
+                    } else if (pauseMenuOptions[pauseMenuIndex].equals("Quit")) {
+                        java.awt.Window window = javax.swing.SwingUtilities.getWindowAncestor(this);
+                        if (window != null) {
+                            window.dispose();
+                        }
+                    }
+                }
+            }
+            repaint();
+        } else {
+            // Game movement
+            if (keyCode == KeyEvent.VK_UP) {
+                pacman.updateDirection('U');
+            } else if (keyCode == KeyEvent.VK_DOWN) {
+                pacman.updateDirection('D');
+            } else if (keyCode == KeyEvent.VK_LEFT) {
+                pacman.updateDirection('L');
+            } else if (keyCode == KeyEvent.VK_RIGHT) {
+                pacman.updateDirection('R');
+            }
+
+            if (pacman.direction == 'U') {
+                pacman.image = pacmanUpImage;
+            } else if (pacman.direction == 'D') {
+                pacman.image = pacmanDownImage;
+            } else if (pacman.direction == 'L') {
+                pacman.image = pacmanLeftImage;
+            } else if (pacman.direction == 'R') {
+                pacman.image = pacmanRightImage;
+            }
         }
     }
-}
 
+    @Override
+    public void keyReleased(KeyEvent e) {}
+}
