@@ -124,6 +124,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int score = 0;
     int lives = 3;
     boolean gameOver = false;
+    boolean showInstructions = true;
 
     boolean isPaused = false;
     String[] pauseMenuOptions = {"Resume", "Controls", "Quit"};
@@ -248,74 +249,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
         }
 
-        if (isPaused) {
-            drawPauseMenu(g);
-        }
-    }
-
-    public void drawPauseMenu(Graphics g) {
-        // Transparent Overlay
-        g.setColor(pauseOverlayColor);
-        g.fillRect(0, 0, boardWidth, boardHeight);
-
-        g.setFont(headerFont);
-        g.setColor(Color.YELLOW);
-        
-        if (showControls) {
-            String text;
-            int x;
-            FontMetrics fm;
-
-            // Header
-            g.setFont(headerFont);
-            g.setColor(Color.YELLOW);
-            fm = g.getFontMetrics();
-            text = "CONTROLS";
-            x = (boardWidth - fm.stringWidth(text)) / 2;
-            g.drawString(text, x, boardHeight / 2 - 150);
-            
-            // Movement Controls
-            g.setFont(controlFont);
-            g.setColor(Color.WHITE);
-            fm = g.getFontMetrics();
-            String[] controlLines = {
-                "^ : Move Up",
-                "v : Move Down",
-                "<- : Move Left",
-                "-> : Move Right",
-                "P or ESC to Pause"
-            };
-            
-            for (int i = 0; i < controlLines.length; i++) {
-                text = controlLines[i];
-                x = (boardWidth - fm.stringWidth(text)) / 2;
-                g.drawString(text, x, boardHeight / 2 - 60 + (i * 40));
-            }
-            
-            // Return Prompt
-            g.setFont(promptFont);
-            g.setColor(Color.YELLOW);
-            fm = g.getFontMetrics();
-            text = "Press ESC or BACKSPACE to return";
-            x = (boardWidth - fm.stringWidth(text)) / 2;
-            g.drawString(text, x, boardHeight / 2 + 160);
-        } else {
-            g.drawString("PAUSED", boardWidth / 2 - 70, boardHeight / 2 - 100);
-
-            g.setFont(menuFont);
-            for (int i = 0; i < pauseMenuOptions.length; i++) {
-                if (i == pauseMenuIndex) {
-                    g.setColor(Color.YELLOW);
-                    g.drawString("> " + pauseMenuOptions[i], boardWidth / 2 - 60, boardHeight / 2 + (i * 40));
-                } else {
-                    g.setColor(Color.WHITE);
-                    g.drawString("  " + pauseMenuOptions[i], boardWidth / 2 - 60, boardHeight / 2 + (i * 40));
-                }
-            }
-            
-            g.setFont(menuInstructionFont);
-            g.setColor(Color.WHITE);
-            g.drawString("UP/DOWN to Navigate, ENTER to Select", boardWidth / 2 - 140, boardHeight - 50);
         }
     }
 
@@ -394,6 +327,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (showInstructions) {
+            repaint();
+            return;
+        }
         move();
         repaint();
         if (gameOver) {
@@ -405,7 +342,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {
+
         if (gameOver) {
             loadMap();
             resetPositions();
