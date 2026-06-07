@@ -199,33 +199,83 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+      @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        draw(g);
+       
+        // Cast to Graphics2D to unlock high-end rendering pipelines
+        Graphics2D g2d = (Graphics2D) g;
+        
+        // TASK: "Implement cleaner, anti-aliased fonts" -> Enable smooth rendering
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        draw(g2d);
     }
 
-    public void draw(Graphics g) {
-        g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
+    public void draw(Graphics2D g) {
+        // Draw Pacman
+        if (pacman != null && pacman.image != null) {
+            g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
+        }
 
+        // Draw Ghosts
         for (Block ghost : ghosts) {
-            g.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height, null);
+            if (ghost.image != null) {
+                g.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height, null);
+            }
         }
 
+        // Draw Walls
         for (Block wall : walls) {
-            g.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height, null);
+            if (wall.image != null) {
+                g.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height, null);
+            }
         }
 
-        g.setColor(Color.WHITE);
+        // TASK: "Improve colors and cleaner UI" -> Render smooth circular pellets instead of squares
+        g.setColor(new Color(255, 184, 151)); // Classic warm arcade pellet color
         for (Block food : foods) {
-            g.fillRect(food.x, food.y, food.width, food.height);
+            g.fillOval(food.x, food.y, food.width + 2, food.height + 2); // Circle pellet transformation
         }
-        //score
-        g.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        // TASK: "Modernize layout palette and responsive styling"
+        // Upper HUD Dashboard Banner
+        g.setColor(new Color(15, 15, 30, 200)); // Sleek semi-transparent dark banner
+        g.fillRect(0, 0, boardWidth, 40);
+        g.setColor(new Color(0, 240, 255));      // Electric Neon Cyan accent border line
+        g.drawLine(0, 40, boardWidth, 40);
+
         if (gameOver) {
-            g.drawString("Game Over: " + String.valueOf(score), tileSize/2, tileSize/2);
-        }
-        else {
-            g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
+            // High-contrast Arcade Game Over Screen Overlay
+            g.setColor(new Color(0, 0, 0, 180)); // Dark background dimming filter
+            g.fillRect(0, 0, boardWidth, boardHeight);
+
+            // Shadow Layer for Text Glow
+            g.setFont(new Font("Monospaced", Font.BOLD, 36));
+            g.setColor(new Color(255, 0, 100)); // Crimson shadow
+            g.drawString("GAME OVER", boardWidth / 2 - 102, boardHeight / 2 + 2);
+
+            // Primary Layer
+            g.setColor(new Color(255, 255, 255)); // Crisp White text
+            g.drawString("GAME OVER", boardWidth / 2 - 100, boardHeight / 2);
+
+            // Render Final Score Statistics
+            g.setFont(new Font("Monospaced", Font.BOLD, 20));
+            g.setColor(new Color(255, 255, 0)); // Neon Yellow Score
+            g.drawString("FINAL SCORE: " + score, boardWidth / 2 - 80, boardHeight / 2 + 50);
+        } else {
+            // Live Status HUD Rendering
+            g.setFont(new Font("Monospaced", Font.BOLD, 16));
+            
+            // Render Lives Indicator
+            g.setColor(new Color(255, 40, 100)); // Neon Red for lives status
+            g.drawString("LIVES: " + "♥ ".repeat(Math.max(0, lives)), 15, 26);
+            
+            // Render Real-Time Scoring Matrix
+            g.setColor(new Color(255, 255, 0));  // Neon Yellow for classic scoring
+            String scoreText = "SCORE: " + String.format("%05d", score);
+            g.drawString(scoreText, boardWidth - 140, 26);
         }
         
         if (showInstructions) {
