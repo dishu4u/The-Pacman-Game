@@ -124,6 +124,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int score = 0;
     int lives = 3;
     boolean gameOver = false;
+    boolean isPaused = false;
 
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -224,7 +225,29 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.drawString("Game Over: " + String.valueOf(score), tileSize/2, tileSize/2);
         }
         else {
-            g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
+           // g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
+         g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
+
+        if (isPaused && !gameOver) {
+            g.setColor(new Color(0, 0, 0, 150));
+            g.fillRect(0, 0, boardWidth, boardHeight);
+
+            g.setColor(Color.YELLOW);
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            FontMetrics fm = g.getFontMetrics();
+            String pauseText = "PAUSED";
+            int textX = (boardWidth - fm.stringWidth(pauseText)) / 2;
+            int textY = boardHeight / 2 - 20;
+            g.drawString(pauseText, textX, textY);
+
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.PLAIN, 16));
+            fm = g.getFontMetrics();
+            String resumeText = "Press P to Resume";
+            int resumeX = (boardWidth - fm.stringWidth(resumeText)) / 2;
+            g.drawString(resumeText, resumeX, textY + 35);
+        }
+    }
         }
     }
 
@@ -318,12 +341,26 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+         public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_P && !gameOver) {  
+            isPaused = !isPaused;                              
+            if (isPaused) {                                    
+                gameLoop.stop();                               
+            } else {                                           
+                gameLoop.start();                              
+            }                                                  
+            repaint();                                         
+            return;                                            
+        }                                                      
+
         if (gameOver) {
+       
             loadMap();
             resetPositions();
             lives = 3;
             score = 0;
             gameOver = false;
+             isPaused = false;
             gameLoop.start();
         }
         // System.out.println("KeyEvent: " + e.getKeyCode());
