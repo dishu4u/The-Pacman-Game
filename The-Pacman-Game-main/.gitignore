@@ -1,0 +1,13 @@
+*.class
+*.log
+*.ctxt
+.DS_Store
+
+.idea/
+.vscode/
+
+out/
+build/
+target/
+
+*.iml
