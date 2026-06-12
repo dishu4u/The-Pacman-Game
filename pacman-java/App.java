@@ -14,7 +14,7 @@ public class App {
         JFrame frame = new JFrame("Pac Man");
 
 //        Set icon for taskbar and title bar.
-        ImageIcon icon = new ImageIcon(App.class.getResource("pacmanRight.png"));
+        ImageIcon icon = new ImageIcon(App.class.getResource("./images/pacmanRight.png"));
         frame.setIconImage(icon.getImage());
 
         // frame.setVisible(true);
