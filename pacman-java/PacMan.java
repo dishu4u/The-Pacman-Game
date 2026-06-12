@@ -125,6 +125,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int lives = 3;
     boolean gameOver = false;
     boolean showInstructions = true;
+    boolean paused = false;
 
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -276,6 +277,26 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 g.drawString(startMsg, (boardWidth - fm.stringWidth(startMsg)) / 2, boardHeight / 2 + 130);
             }
         }
+        if (paused) {
+            g.setColor(new Color(0, 0, 0, 180));
+            g.fillRect(0, 0, boardWidth, boardHeight);
+
+            g.setFont(new Font("Arial", Font.BOLD, 40));
+            FontMetrics fm = g.getFontMetrics();
+            String pauseTitle = "PAUSED";
+            g.setColor(Color.YELLOW);
+            g.drawString(pauseTitle, (boardWidth - fm.stringWidth(pauseTitle)) / 2, boardHeight / 2 - 40);
+
+            g.setFont(new Font("Arial", Font.PLAIN, 22));
+            fm = g.getFontMetrics();
+            String resumeMsg = "Press P to Resume";
+            g.setColor(Color.WHITE);
+            g.drawString(resumeMsg, (boardWidth - fm.stringWidth(resumeMsg)) / 2, boardHeight / 2 + 10);
+
+            String quitMsg = "Press R to Restart";
+            g.setColor(Color.CYAN);
+            g.drawString(quitMsg, (boardWidth - fm.stringWidth(quitMsg)) / 2, boardHeight / 2 + 50);
+        }
     }
 
     public void move() {
@@ -357,6 +378,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             repaint();
             return;
         }
+        if (paused) {
+            repaint();
+            return;
+        }
         move();
         repaint();
         if (gameOver) {
@@ -384,6 +409,26 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             gameOver = false;
             gameLoop.start();
         }
+
+        // Toggle pause with P key
+        if (e.getKeyCode() == KeyEvent.VK_P) {
+            paused = !paused;
+            return;
+        }
+
+        // Allow restart from pause menu with R key
+        if (paused && e.getKeyCode() == KeyEvent.VK_R) {
+            loadMap();
+            resetPositions();
+            lives = 3;
+            score = 0;
+            gameOver = false;
+            paused = false;
+            return;
+        }
+
+       // Guard arrow keys — don't move pacman while paused
+        if (paused) return;
         // System.out.println("KeyEvent: " + e.getKeyCode());
         if (e.getKeyCode() == KeyEvent.VK_UP) {
             pacman.updateDirection('U');
