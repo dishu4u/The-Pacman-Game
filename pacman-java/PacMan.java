@@ -125,6 +125,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int lives = 3;
     boolean gameOver = false;
     boolean showInstructions = true;
+    boolean showDifficultySelect = false;
+    int ghostSpeedMultiplier = 1; // 1 = easy, 2 = medium, 3 = hard
 
     PacMan() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -276,6 +278,39 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 g.drawString(startMsg, (boardWidth - fm.stringWidth(startMsg)) / 2, boardHeight / 2 + 130);
             }
         }
+        if (showDifficultySelect) {
+            g.setColor(new Color(0, 0, 0, 210));
+            g.fillRect(0, 0, boardWidth, boardHeight);
+
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            FontMetrics fm = g.getFontMetrics();
+            String title = "SELECT DIFFICULTY";
+            g.setColor(Color.YELLOW);
+            g.drawString(title, (boardWidth - fm.stringWidth(title)) / 2, boardHeight / 2 - 90);
+
+            // Easy
+            g.setFont(new Font("Arial", Font.BOLD, 26));
+            fm = g.getFontMetrics();
+            String easy = "1  -  EASY";
+            g.setColor(Color.GREEN);
+            g.drawString(easy, (boardWidth - fm.stringWidth(easy)) / 2, boardHeight / 2 - 20);
+
+            // Medium
+            String medium = "2  -  MEDIUM";
+            g.setColor(Color.ORANGE);
+            g.drawString(medium, (boardWidth - fm.stringWidth(medium)) / 2, boardHeight / 2 + 30);
+
+            // Hard
+            String hard = "3  -  HARD";
+            g.setColor(Color.RED);
+            g.drawString(hard, (boardWidth - fm.stringWidth(hard)) / 2, boardHeight / 2 + 80);
+
+            g.setFont(new Font("Arial", Font.PLAIN, 18));
+            fm = g.getFontMetrics();
+            String hint = "Press 1, 2, or 3 to begin";
+            g.setColor(Color.WHITE);
+            g.drawString(hint, (boardWidth - fm.stringWidth(hint)) / 2, boardHeight / 2 + 140);
+        }
     }
 
     public void move() {
@@ -351,9 +386,25 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+    public void applyDifficulty() {
+        int delay;
+        if (ghostSpeedMultiplier == 1) {
+            delay = 70; // Easy: slower ticks = more reaction time
+        } else if (ghostSpeedMultiplier == 2) {
+            delay = 50; // Medium: default speed (original game speed)
+        } else {
+            delay = 30; // Hard: faster ticks = ghosts feel much faster
+        }
+        gameLoop.setDelay(delay);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (showInstructions) {
+            repaint();
+            return;
+        }
+        if (showDifficultySelect) {
             repaint();
             return;
         }
@@ -374,6 +425,21 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void keyReleased(KeyEvent e) {
         if (showInstructions) {
             showInstructions = false;
+            showDifficultySelect = true;
+            return;
+        }
+        if (showDifficultySelect) {
+            if (e.getKeyCode() == KeyEvent.VK_1) {
+                ghostSpeedMultiplier = 1;
+            } else if (e.getKeyCode() == KeyEvent.VK_2) {
+                ghostSpeedMultiplier = 2;
+            } else if (e.getKeyCode() == KeyEvent.VK_3) {
+                ghostSpeedMultiplier = 3;
+            } else {
+                return; // ignore any other key on this screen
+            }
+            showDifficultySelect = false;
+            applyDifficulty();
             return;
         }
         if (gameOver) {
@@ -382,6 +448,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             lives = 3;
             score = 0;
             gameOver = false;
+            applyDifficulty();
             gameLoop.start();
         }
         // System.out.println("KeyEvent: " + e.getKeyCode());
