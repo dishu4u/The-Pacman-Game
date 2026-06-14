@@ -219,15 +219,38 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         for (Block food : foods) {
             g.fillRect(food.x, food.y, food.width, food.height);
         }
-        //score
-        g.setFont(new Font("Arial", Font.PLAIN, 18));
-        if (gameOver) {
-            g.drawString("Game Over: " + String.valueOf(score), tileSize/2, tileSize/2);
-        }
-        else {
-            g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
-        }
-        
+       
+  
+// score
+g.setFont(new Font("Arial", Font.BOLD, 22));
+g.setColor(Color.YELLOW);
+
+if (gameOver) {
+
+    // Game Over Box
+    g.setColor(Color.BLACK);
+    g.fillRect(boardWidth/2 - 120, boardHeight/2 - 50, 240, 90);
+
+    g.setColor(Color.RED);
+    g.drawRect(boardWidth/2 - 120, boardHeight/2 - 50, 240, 90);
+
+    // Game Over Title
+    g.setFont(new Font("Arial", Font.BOLD, 28));
+    g.setColor(Color.RED);
+    g.drawString("GAME OVER!", boardWidth/2 - 85, boardHeight/2 - 10);
+
+    // Final Score
+    g.setFont(new Font("Arial", Font.PLAIN, 16));
+    g.setColor(Color.WHITE);
+    g.drawString("Final Score: " + score, boardWidth/2 - 55, boardHeight/2 + 20);
+
+} else {
+
+    // Lives and Score Display
+    g.setFont(new Font("Arial", Font.BOLD, 22));
+    g.setColor(Color.YELLOW);
+    g.drawString("Lives: " + lives + "    Score: " + score, 20, 30);
+}
         if (showInstructions) {
             g.setColor(new Color(0, 0, 0, 210)); 
             g.fillRect(0, 0, boardWidth, boardHeight);
