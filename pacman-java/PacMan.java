@@ -309,10 +309,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             ghost.y += ghost.velocityY;
             for (Block wall : walls) {
                 if (collision(ghost, wall) || ghost.x <= 0 || ghost.x + ghost.width >= boardWidth) {
-                    ghost.x -= ghost.velocityX;
-                    ghost.y -= ghost.velocityY;
-                    char newDirection = directions[random.nextInt(4)];
-                    ghost.updateDirection(newDirection);
+                 ghost.x -= ghost.velocityX;
+                 ghost.y -= ghost.velocityY;
+                 char newDirection = getSmartDirection(ghost);
+                 ghost.updateDirection(newDirection);
                 }
             }
         }
@@ -332,6 +332,25 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             resetPositions();
         }
     }
+
+    private char getSmartDirection(Block ghost) {
+
+    int dx = pacman.x - ghost.x;
+    int dy = pacman.y - ghost.y;
+
+    // 70% chance to move toward Pac-Man
+    if (random.nextInt(100) < 70) {
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            return dx > 0 ? 'R' : 'L';
+        } else {
+            return dy > 0 ? 'D' : 'U';
+        }
+    }
+
+    // 30% chance to choose a random direction
+    return directions[random.nextInt(4)];
+}
 
     public boolean collision(Block a, Block b) {
         return  a.x < b.x + b.width &&
