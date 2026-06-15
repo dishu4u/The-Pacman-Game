@@ -3,6 +3,8 @@ import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Random;
 import javax.swing.*;
+import java.util.Map;
+
 
 public class PacMan extends JPanel implements ActionListener, KeyListener {
 
@@ -279,59 +281,144 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     public void move() {
-        pacman.x += pacman.velocityX;
-        pacman.y += pacman.velocityY;
 
-        //check wall collisions
-        for (Block wall : walls) {
-            if (collision(pacman, wall)) {
-                pacman.x -= pacman.velocityX;
-                pacman.y -= pacman.velocityY;
-                break;
-            }
+    // ─── STEP 1: Move Pac-Man by its current velocity ───────────────────
+    pacman.x += pacman.velocityX;
+    pacman.y += pacman.velocityY;
+
+    // ─── STEP 2: Pac-Man vs Wall Collision Detection ─────────────────────
+    // If Pac-Man hits a wall, revert its position back
+    for (Block wall : walls) {
+        if (collision(pacman, wall)) {
+            pacman.x -= pacman.velocityX;
+            pacman.y -= pacman.velocityY;
+            break;
         }
+    }
 
-        //check ghost collisions
-        for (Block ghost : ghosts) {
-            if (collision(ghost, pacman)) {
-                lives -= 1;
-                if (lives == 0) {
-                    gameOver = true;
-                    return;
-                }
-                resetPositions();
+    // ─── STEP 3: Pac-Man vs Ghost Collision Detection ────────────────────
+    // If any ghost touches Pac-Man, reduce a life
+    // If lives reach 0, trigger Game Over
+    for (Block ghost : ghosts) {
+        if (collision(ghost, pacman)) {
+            lives -= 1;
+            if (lives == 0) {
+                gameOver = true;
+                return;
             }
-
-            if (ghost.y == tileSize*9 && ghost.direction != 'U' && ghost.direction != 'D') {
-                ghost.updateDirection('U');
-            }
-            ghost.x += ghost.velocityX;
-            ghost.y += ghost.velocityY;
-            for (Block wall : walls) {
-                if (collision(ghost, wall) || ghost.x <= 0 || ghost.x + ghost.width >= boardWidth) {
-                    ghost.x -= ghost.velocityX;
-                    ghost.y -= ghost.velocityY;
-                    char newDirection = directions[random.nextInt(4)];
-                    ghost.updateDirection(newDirection);
-                }
-            }
-        }
-
-        //check food collision
-        Block foodEaten = null;
-        for (Block food : foods) {
-            if (collision(pacman, food)) {
-                foodEaten = food;
-                score += 10;
-            }
-        }
-        foods.remove(foodEaten);
-
-        if (foods.isEmpty()) {
-            loadMap();
             resetPositions();
         }
     }
+    Map<Block, int[]> nextPositions = new java.util.HashMap<>();
+
+    for (Block ghost : ghosts) {
+    nextPositions.put(ghost, new int[]{
+        ghost.x + ghost.velocityX,
+        ghost.y + ghost.velocityY
+    });
+}
+
+    // ─── STEP 4: Ghost Movement Logic ────────────────────────────────────
+    for (Block ghost : ghosts) {
+
+        // Force ghost upward if stuck in ghost house row
+        if (ghost.y == tileSize * 9 && ghost.direction != 'U' && ghost.direction != 'D') {
+            ghost.updateDirection('U');
+        }
+
+        // Calculate ghost's next position based on current velocity
+    int nextX = nextPositions.get(ghost)[0];
+    int nextY = nextPositions.get(ghost)[1];
+
+
+        // ── 4a: Ghost vs Ghost Collision Check (Pre-Move) ────────────────
+        // Check if next position overlaps with any other ghost
+        // If blocked, pick a new random direction and skip this frame
+        boolean blockedByGhost = false;
+
+for (Block other : ghosts) {
+    if (other == ghost) continue;
+
+    int[] otherNext = nextPositions.get(other);
+
+    if (nextX < otherNext[0] + other.width &&
+        nextX + ghost.width > otherNext[0] &&
+        nextY < otherNext[1] + other.height &&
+        nextY + ghost.height > otherNext[1]) {
+
+        blockedByGhost = true;
+        break;
+    }
+}
+
+        if (blockedByGhost) {
+            // Redirect ghost and do not move this frame
+            ghost.updateDirection(directions[random.nextInt(4)]);
+            continue;
+        }
+
+        // ── 4b: Ghost vs Wall Collision Check (Pre-Move) ─────────────────
+        // Check if next position overlaps with any wall or board boundary
+        // If blocked, choose a smart direction toward Pac-Man
+        boolean blockedByWall = false;
+for (Block wall : walls) {
+
+    if (nextX < wall.x + wall.width &&
+        nextX + ghost.width > wall.x &&
+        nextY < wall.y + wall.height &&
+        nextY + ghost.height > wall.y) {
+
+        blockedByWall = true;
+        break;
+    }
+}
+        if (blockedByWall || nextX <= 0 || nextX + ghost.width >= boardWidth) {
+            // Redirect ghost smartly toward Pac-Man
+            ghost.updateDirection(getSmartDirection(ghost));
+        } else {
+            // No collision detected — move ghost to next position
+            ghost.x = nextX;
+            ghost.y = nextY;
+        }
+    }
+
+    // ─── STEP 5: Pac-Man vs Food Collision Detection ─────────────────────
+    // If Pac-Man eats a food dot, remove it and increase score by 10
+    Block foodEaten = null;
+    for (Block food : foods) {
+        if (collision(pacman, food)) {
+            foodEaten = food;
+            score += 10;
+        }
+    }
+    foods.remove(foodEaten);
+
+    // ─── STEP 6: Level Reset Check ───────────────────────────────────────
+    // If all food is eaten, reload the map and reset all positions
+    if (foods.isEmpty()) {
+        loadMap();
+        resetPositions();
+    }
+}
+
+    private char getSmartDirection(Block ghost) {
+
+    int dx = pacman.x - ghost.x;
+    int dy = pacman.y - ghost.y;
+
+    // 70% chance to move toward Pac-Man
+    if (random.nextInt(100) < 70) {
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            return dx > 0 ? 'R' : 'L';
+        } else {
+            return dy > 0 ? 'D' : 'U';
+        }
+    }
+
+    // 30% chance to choose a random direction
+    return directions[random.nextInt(4)];
+}
 
     public boolean collision(Block a, Block b) {
         return  a.x < b.x + b.width &&
