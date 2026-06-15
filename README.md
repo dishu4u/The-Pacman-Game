@@ -16,7 +16,9 @@ A classic Pac-Man arcade game built using Java Swing/AWT.
 
 This project is designed for Java learners and open-source contributors interested in 2D game development.
 
----# 📸 Screenshots
+---
+
+# 📸 Screenshots
 
 ## Gameplay
 
@@ -47,10 +49,17 @@ This project is designed for Java learners and open-source contributors interest
 # 📂 Project Structure
 
 ```bash
-pacman-java/
-│── src/
+The-Pacman-Game/
+│── pacman-java/
+│   │── App.java
+│   │── PacMan.java
+│   │── *.png
 │── assets/
+│   │── screenshots/
 │── README.md
+│── CONTRIBUTING.md
+│── CODE_OF_CONDUCT.md
+│── LICENSE
 ```
 
 ---
