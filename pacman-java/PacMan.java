@@ -210,12 +210,13 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         for (Block ghost : ghosts) {
             g.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height, null);
         }
+        g.setColor(Color.WHITE);
+
 
         for (Block wall : walls) {
             g.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height, null);
         }
 
-        g.setColor(Color.WHITE);
         for (Block food : foods) {
             g.fillRect(food.x, food.y, food.width, food.height);
         }
@@ -225,8 +226,30 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.drawString("Game Over: " + String.valueOf(score), tileSize/2, tileSize/2);
         }
         else {
-            g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
-        }
+         g.drawString(
+        "Score: " + String.valueOf(score),
+        tileSize/2,
+        tileSize/2
+          );  
+          
+      // Display remaining lives using Pac-Man icons at the bottom of the screen
+
+        int lifeIconSize = 24;
+        int startX = 10;
+         int startY = boardHeight - 50;
+         g.setColor(Color.WHITE);
+
+// Draw one Pac-Man icon for each remaining life
+for (int i = 0; i < lives; i++) {
+    g.drawImage(
+        pacmanRightImage,
+        startX + (i * 28),
+        startY,
+        lifeIconSize,
+        lifeIconSize,
+        null
+    );
+}     }
         
         if (showInstructions) {
             g.setColor(new Color(0, 0, 0, 210)); 
