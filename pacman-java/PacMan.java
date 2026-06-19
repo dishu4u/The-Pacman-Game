@@ -124,6 +124,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     int score = 0;
     int lives = 3;
     boolean gameOver = false;
+    boolean paused=false;
     boolean showInstructions = true;
 
     PacMan() {
@@ -220,7 +221,16 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.fillRect(food.x, food.y, food.width, food.height);
         }
         //score
+        
         g.setFont(new Font("Arial", Font.PLAIN, 18));
+        if(paused){
+            g.setColor(Color,YELLOW);
+            g.setFont(new Font("Arial",Font,BOLD,30));
+            g.drawString("PAUSED",boardwidth/2-60, boardHeight/2);
+            g.setFont(new Font("Arial", Font.PLAIN,18));
+            g.drawString("Press P to resume",boardWidth /2-90, boardHeight /2+40);
+            return;
+        }
         if (gameOver) {
             g.drawString("Game Over: " + String.valueOf(score), tileSize/2, tileSize/2);
         }
@@ -242,6 +252,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             String startMsg = "Press ANY KEY to Start!";
 
             // Title with shadow
+            
             g.setFont(new Font("Arial", Font.BOLD, 50));
             FontMetrics fm = g.getFontMetrics();
             g.setColor(Color.BLUE);
@@ -388,6 +399,15 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             gameLoop.start();
         }
         // System.out.println("KeyEvent: " + e.getKeyCode());
+        if(e.getKeyCode() == KeyEvent.VK_P){
+            paused=!paused;
+            if(paused){
+                gameLoop.stop();
+            }
+            else{
+                gameLoop.start();
+            }
+            return;
         if (e.getKeyCode() == KeyEvent.VK_UP) {
             pacman.updateDirection('U');
         }
