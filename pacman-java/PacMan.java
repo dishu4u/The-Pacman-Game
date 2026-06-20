@@ -311,6 +311,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 if (collision(ghost, wall) || ghost.x <= 0 || ghost.x + ghost.width >= boardWidth) {
                     ghost.x -= ghost.velocityX;
                     ghost.y -= ghost.velocityY;
+
+                    ghost.x = Math.round((float) ghost.x / tileSize) * tileSize;
+                    ghost.y = Math.round((float) ghost.y / tileSize) * tileSize;
+                    
                     char newDirection = directions[random.nextInt(4)];
                     ghost.updateDirection(newDirection);
                 }
