@@ -221,13 +221,29 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         //score
         g.setFont(new Font("Arial", Font.PLAIN, 18));
+        g.setColor(Color.WHITE);
+        g.drawString("x" + lives + " Score: " + score, tileSize / 2, tileSize / 2);
+
         if (gameOver) {
-            g.drawString("Game Over: " + String.valueOf(score), tileSize/2, tileSize/2);
-        }
-        else {
-            g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
-        }
-        
+            String gameOverText = "GAME OVER";
+            String restartText = "Press any key to restart";
+
+            g.setFont(new Font("Arial", Font.BOLD, 36));
+            FontMetrics fm = g.getFontMetrics();
+
+            int x = (boardWidth - fm.stringWidth(gameOverText)) / 2;
+            int y = boardHeight / 2;
+
+            g.setColor(Color.RED);
+            g.drawString(gameOverText, x, y);
+
+            g.setFont(new Font("Arial", Font.PLAIN, 20));
+            fm = g.getFontMetrics();
+
+            int restartX = (boardWidth - fm.stringWidth(restartText)) / 2;
+            g.setColor(Color.WHITE);
+            g.drawString(restartText, restartX, y + 40);
+       }
         if (showInstructions) {
             g.setColor(new Color(0, 0, 0, 210)); 
             g.fillRect(0, 0, boardWidth, boardHeight);
