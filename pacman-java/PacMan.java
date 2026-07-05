@@ -305,13 +305,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             g.drawImage(redGhostImage, boardWidth / 2 + 30, pacY, tileSize + 15, tileSize + 15, null);
             g.drawImage(blueGhostImage, boardWidth / 2 + 110, pacY, tileSize + 15, tileSize + 15, null);
             
-            // Blinking restart message
-            if ((System.currentTimeMillis() / 500) % 2 == 0) {
-                g.setColor(Color.YELLOW);
-                g.setFont(new Font("Arial", Font.BOLD, 22));
-                fm = g.getFontMetrics();
-                g.drawString(restartMsg, (boardWidth - fm.stringWidth(restartMsg)) / 2, boardHeight / 2 + 140);
-            }
+            // Always visible restart message (not blinking)
+            g.setColor(Color.YELLOW);
+            g.setFont(new Font("Arial", Font.BOLD, 22));
+            fm = g.getFontMetrics();
+            g.drawString(restartMsg, (boardWidth - fm.stringWidth(restartMsg)) / 2, boardHeight / 2 + 140);
         }
     }
 
@@ -399,6 +397,11 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         if (gameOver) {
             repaint();
             gameLoop.stop();
+            try {
+                Thread.sleep(500); // Delay to ensure game over screen is visible
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
             return;
         }
         
