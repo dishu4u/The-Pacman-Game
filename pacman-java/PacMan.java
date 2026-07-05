@@ -221,10 +221,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         //score
         g.setFont(new Font("Arial", Font.PLAIN, 18));
-        if (gameOver) {
-            g.drawString("Game Over: " + String.valueOf(score), tileSize/2, tileSize/2);
-        }
-        else {
+        if (!gameOver) {
             g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
         }
         
@@ -274,6 +271,46 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 g.setFont(new Font("Arial", Font.BOLD, 24));
                 fm = g.getFontMetrics();
                 g.drawString(startMsg, (boardWidth - fm.stringWidth(startMsg)) / 2, boardHeight / 2 + 130);
+            }
+        }
+        
+        // Game Over Screen
+        if (gameOver) {
+            g.setColor(new Color(0, 0, 0, 220));
+            g.fillRect(0, 0, boardWidth, boardHeight);
+            
+            String gameOverTitle = "GAME OVER!";
+            String finalScoreMsg = "Final Score: " + String.valueOf(score);
+            String restartMsg = "Press ANY KEY to Restart!";
+            
+            // Game Over Title with red shadow effect
+            g.setFont(new Font("Arial", Font.BOLD, 60));
+            FontMetrics fm = g.getFontMetrics();
+            g.setColor(new Color(139, 0, 0)); // Dark red shadow
+            g.drawString(gameOverTitle, (boardWidth - fm.stringWidth(gameOverTitle)) / 2 + 5, boardHeight / 2 - 120 + 5);
+            g.setColor(Color.RED);
+            g.drawString(gameOverTitle, (boardWidth - fm.stringWidth(gameOverTitle)) / 2, boardHeight / 2 - 120);
+            
+            // Display game statistics
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 28));
+            fm = g.getFontMetrics();
+            g.drawString(finalScoreMsg, (boardWidth - fm.stringWidth(finalScoreMsg)) / 2, boardHeight / 2 - 20);
+            
+            // Display sad Pac-Man sprite
+            int pacY = boardHeight / 2 + 20;
+            g.drawImage(pacmanRightImage, boardWidth / 2 - 50, pacY, tileSize + 15, tileSize + 15, null);
+            
+            // Display all ghosts that caught Pac-Man
+            g.drawImage(redGhostImage, boardWidth / 2 + 30, pacY, tileSize + 15, tileSize + 15, null);
+            g.drawImage(blueGhostImage, boardWidth / 2 + 110, pacY, tileSize + 15, tileSize + 15, null);
+            
+            // Blinking restart message
+            if ((System.currentTimeMillis() / 500) % 2 == 0) {
+                g.setColor(Color.YELLOW);
+                g.setFont(new Font("Arial", Font.BOLD, 22));
+                fm = g.getFontMetrics();
+                g.drawString(restartMsg, (boardWidth - fm.stringWidth(restartMsg)) / 2, boardHeight / 2 + 140);
             }
         }
     }
@@ -357,11 +394,17 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             repaint();
             return;
         }
+        
+        // If game is over, just repaint and stop - don't update game state
+        if (gameOver) {
+            repaint();
+            gameLoop.stop();
+            return;
+        }
+        
+        // Normal gameplay: move and render
         move();
         repaint();
-        if (gameOver) {
-            gameLoop.stop();
-        }
     }
 
     @Override
@@ -376,15 +419,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             showInstructions = false;
             return;
         }
+        
+        // Handle game over restart
         if (gameOver) {
-            loadMap();
-            resetPositions();
-            lives = 3;
-            score = 0;
-            gameOver = false;
-            gameLoop.start();
+            restartGame();
+            return;
         }
-        // System.out.println("KeyEvent: " + e.getKeyCode());
+        
+        // Handle movement controls
         if (e.getKeyCode() == KeyEvent.VK_UP) {
             pacman.updateDirection('U');
         }
@@ -398,6 +440,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             pacman.updateDirection('R');
         }
 
+        // Update Pac-Man sprite based on direction
         if (pacman.direction == 'U') {
             pacman.image = pacmanUpImage;
         }
@@ -409,6 +452,18 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         else if (pacman.direction == 'R') {
             pacman.image = pacmanRightImage;
+        }
+    }
+    
+    // Restart game method - properly resets all game state
+    private void restartGame() {
+        loadMap();
+        resetPositions();
+        lives = 3;
+        score = 0;
+        gameOver = false;
+        if (!gameLoop.isRunning()) {
+            gameLoop.start();
         }
     }
 }
