@@ -1,0 +1,97 @@
+package pacmanjava;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Random;
+
+public class App extends JPanel implements KeyListener {
+    private static final int WIDTH = 640;
+    private static final int HEIGHT = 480;
+    private static final int PACMAN_SIZE = 20;
+    private static final int GHOST_SIZE = 20;
+    private static final int DELAY = 100;
+
+    private int pacmanX = WIDTH / 2;
+    private int pacmanY = HEIGHT / 2;
+    private int lives = 3;
+    private int score = 0;
+
+    private boolean gameOver = false;
+
+    public App() {
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        setBackground(Color.BLACK);
+        setFocusable(true);
+        requestFocus();
+        addKeyListener(this);
+        Timer timer = new Timer(DELAY, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateGame();
+                repaint();
+            }
+        });
+        timer.start();
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (gameOver) {
+            drawGameOverScreen(g);
+        } else {
+            drawGameScreen(g);
+        }
+    }
+
+    private void drawGameOverScreen(Graphics g) {
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 24));
+        g.drawString("Game Over", WIDTH / 2 - 50, HEIGHT / 2);
+        g.drawString("Score: " + score, WIDTH / 2 - 50, HEIGHT / 2 + 30);
+        g.drawString("Press any key to restart", WIDTH / 2 - 100, HEIGHT / 2 + 60);
+    }
+
+    private void drawGameScreen(Graphics g) {
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 24));
+        g.drawString("Score: " + score, 10, 30);
+        g.drawString("Lives: " + lives, 10, 60);
+    }
+
+    private void updateGame() {
+        if (gameOver) {
+            return;
+        }
+        // Game logic here
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (gameOver) {
+            gameOver = false;
+            lives = 3;
+            score = 0;
+            pacmanX = WIDTH / 2;
+            pacmanY = HEIGHT / 2;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Pac-Man");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(new App());
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
