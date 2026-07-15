@@ -2,6 +2,7 @@
 *.log
 *.ctxt
 .DS_Store
+desktop.ini
 
 .idea/
 .vscode/
