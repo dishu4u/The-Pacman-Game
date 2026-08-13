@@ -234,7 +234,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
             String title = "PAC-MAN";
             String controlsTitle = "HOW TO PLAY";
-            String controls = "↑ ↓ ← → Arrow Keys to Move";
+            String controls = "↑ ↓ ← → or W A S D to Move";
             String objMsg = "Eat all the food, avoid the ghosts!";
             String startMsg = "Press ANY KEY to Start!";
 
@@ -385,18 +385,18 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             gameLoop.start();
         }
         // System.out.println("KeyEvent: " + e.getKeyCode());
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            pacman.updateDirection('U');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            pacman.updateDirection('D');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            pacman.updateDirection('L');
-        }
-        else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            pacman.updateDirection('R');
-        }
+       if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
+    pacman.updateDirection('U');
+}
+else if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
+    pacman.updateDirection('D');
+}
+else if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
+    pacman.updateDirection('L');
+}
+else if (e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
+    pacman.updateDirection('R');
+}
 
         if (pacman.direction == 'U') {
             pacman.image = pacmanUpImage;
